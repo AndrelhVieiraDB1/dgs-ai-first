@@ -8,9 +8,9 @@
 | 2.3 — Skills | Árvore de skills, mapeamento criação/consumo, SKILL.md Foundation | [dev-2.3-estrategia-skills.md](dev-2.3-estrategia-skills.md) |
 
 Os artefatos de código vivem no repositório local `novatech-assistant`
-(`~/Downloads/novatech-assistant`), commit desta fase:
+(`~/Downloads/novatech-assistant`), commits desta fase:
 
-- `.mcp/mcp.json` + `.claude/settings.json` (gate de escrita) — Ex. 2.1
+- `.mcp/mcp.json` (schema puro) + `.mcp/README.md` (justificativa de escopos) + `.claude/settings.json` (gate de escrita read-only) — Ex. 2.1
 - `specs/query-endpoint/plan.md` e `tasks.md` — Ex. 2.2
-- `src/shared/types.ts`, `src/functions/query/{validator,handler}.ts`, `tests/unit/*` (12 testes ✅, `tsc` ✅) — Ex. 2.2 (T01)
+- `src/shared/{types,config,logger}.ts`, `src/functions/query/{validator,handler}.ts`, `tests/unit/*` (T01–T03: 21 testes ✅, `tsc` strict ✅) — Ex. 2.2
 - `skills/foundation/typescript-conventions.md` — Ex. 2.3

@@ -19,6 +19,13 @@ Todos os servers são locais e gratuitos (rodam via `npx`, sem nenhum serviço p
 | 5 | Memória persistente de decisões e linguagem ubíqua | `memory` — `@modelcontextprotocol/server-memory` | Tools: `create_entities`, `create_relations`, `search_nodes`, `read_graph` (grafo de conhecimento) | Todos os agentes do time (glossário de domínio: CT-e, tiers, vigência de PROC-042; decisões de ADR resumidas) | arquivo local `.mcp/memory.json` (gitignored) |
 | 6 | Explorar primitivas MCP (aprendizado) | `everything` — `@modelcontextprotocol/server-everything` | Tools/resources/prompts de demonstração | Time todo, **apenas em ambiente de estudo** | — (não entra no `mcp.json` do projeto; ver justificativa abaixo) |
 
+**Primitivas MCP expostas por cada server (tools vs resources vs prompts):**
+
+- `filesystem` (3 instâncias): expõe **apenas tools** (`read_text_file`, `list_directory`, `search_files`, `write_file`…) — o acesso a arquivos é por tool call; o escopo é inspecionável via `list_allowed_directories`. Não publica resources nem prompts.
+- `git`: **apenas tools** (`git_log`, `git_diff`, `git_branch`, `git_status`, `git_show`…).
+- `memory`: **apenas tools** (`create_entities`, `create_relations`, `search_nodes`, `read_graph`) — o "resource" conceitual (o grafo) é acessado via tools.
+- `everything`: o único que exercita as **3 primitivas** (tools + resources + prompts de demonstração) — exatamente por isso seu papel é didático, não operacional.
+
 **Notas sobre escolhas:**
 
 - **Três instâncias do mesmo filesystem server, não uma.** O reference server aplica escopo por processo (lista de diretórios permitidos), mas não tem flag de read-only. Separar instâncias permite tratar permissões por *fonte*: o gate de escrita do cliente nega `write_file`/`edit_file`/`move_file`/`create_directory` nas instâncias `novatech-docs` e `retrieval-corpus`, enquanto `repo-fs` mantém escrita (com confirmação humana).
@@ -29,7 +36,7 @@ Todos os servers são locais e gratuitos (rodam via `npx`, sem nenhum serviço p
 
 ## 2. `.mcp/mcp.json` final
 
-Arquivo criado no repositório (`novatech-assistant/.mcp/mcp.json`):
+Arquivo criado no repositório (`novatech-assistant/.mcp/mcp.json`). Contém **somente** o schema esperado pelos clientes MCP — sem chaves extras de comentário, que poderiam quebrar parsers estritos; a justificativa de escopo vive em `.mcp/README.md`, versionado ao lado:
 
 ```json
 {
@@ -112,6 +119,10 @@ Pergunta de domínio: **"Qual o multiplicador de frete para o Sudeste?"**
 
 - Gabarito (mapa de cobertura): deve recuperar **PROC-042v2-B**; **PROC-042-B** (versão antiga) pode aparecer com relevância menor — contradição proposital 1.0 vs 1.1.
 - Resultado: o agente recuperou via MCP o corpus e selecionou o chunk **PROC-042v2-B** — *"Multiplicadores regionais atualizados (novembro/2023): Sul 1.3, **Sudeste 1.1**, Centro-Oeste 1.4, Nordeste 1.5, Norte 1.8"* — descartando o PROC-042-B (Sudeste 1.0) por ser da versão v1, conforme a regra de vigência da ADR-0003. ✅ Match com o gabarito, incluindo o tratamento da armadilha de contradição.
+
+### Iteração documentada (v1 → v2 da evidência)
+
+A primeira rodada do probe truncava as respostas em 2.200 caracteres para legibilidade — o que **cortava o chunk PROC-042v2-B para fora do transcript**, deixando a evidência (b) sem o dado que comprova o match com o gabarito. A correção (limite de truncamento configurável por chamada; corpus íntegro na evidência b) e a re-execução de todos os cenários estão refletidas nos transcripts finais. Fica a lição de configuração de evidência: *transcript que não mostra o dado recuperado não é evidência de retrieval*.
 
 ---
 
